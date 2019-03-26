@@ -1,2 +1,2 @@
 # Guinea Pig
-Http server application to use for testing purposes.
+Dockerized http server application to use for testing purposes.
