@@ -9,6 +9,9 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/ocramh/guineapig/pkg/metrics"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +58,14 @@ func dbHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", handler)
-	http.HandleFunc("/db", dbHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/db", dbHandler)
+	mux.HandleFunc("/", handler)
+	mux.Handle("/metrics", promhttp.Handler())
+
+	withMetrics := metrics.Middleware(mux)
+
+	log.Fatal(http.ListenAndServe(":8080", withMetrics))
 }
